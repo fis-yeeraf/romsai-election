@@ -10,12 +10,12 @@ export default defineNuxtConfig({
     redirectOptions: {
       login: "/login",
       callback: "/confirm",
-      // include: ["/admin(/*)?"],
-      exclude: ["/", "/admin(/*)?"],
+      include: ["/admin(/*)?"],
+      exclude: ["/"],
     },
   },
   css: ["@/assets/css/main.css"],
   ui: {
-    // colorMode: false,
+    colorMode: false,
   },
 })

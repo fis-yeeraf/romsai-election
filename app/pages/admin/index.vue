@@ -26,7 +26,7 @@
         <UModal v-model:open="openModalPercent" title="กรอกคะแนนร้อยละ" description="">
           <template #body>
             <div>
-              <UFormField label="คะแนนร้อยละ" class="mt-4" :error="error">
+              <UFormField label="คะแนนร้อยละ" class="mt-4" :error="errors">
                 <UInput placeholder="กรุณากรอกคะแนน" class="w-full" v-model="percentage" />
               </UFormField>
             </div>
@@ -36,7 +36,7 @@
               <UButton class="cursor-pointer" @click="openModalPercent = false" color="gray"
                 >ยกเลิก</UButton
               >
-              <UButton class="cursor-pointer" @click="openModalPercent = false" color="primary"
+              <UButton class="cursor-pointer" @click="onUpdatePercentage" color="primary"
                 >บันทึก</UButton
               >
             </div>
@@ -52,7 +52,7 @@ import type { RealtimeChannel } from "@supabase/supabase-js"
 const toast = useToast()
 const openModalPercent = ref(false)
 const percentage = ref<number | null>(null)
-const error = ref<string | null>(null)
+const errors = ref<string | null>(null)
 
 const client = useSupabaseClient()
 
@@ -170,6 +170,33 @@ const onHandleVote = async (score: number, candidateId: string) => {
       color: "error",
     })
   }
+}
+
+const onUpdatePercentage = async () => {
+  if (percentage.value === null) {
+    errors.value = "กรุณากรอกคะแนน"
+    return
+  }
+  const { error } = await client
+    .from("percentage")
+    .update({ finished: percentage.value } as never)
+    .eq("id", 1)
+  if (error) {
+    console.error("Error updating percentage:", error)
+    toast.add({
+      title: "เกิดข้อผิดพลาด",
+      description: "เกิดข้อผิดพลาดในการอัพเดตคะแนนร้อยละ",
+      color: "error",
+    })
+  } else {
+    toast.add({
+      title: "สำเร็จ",
+      description: "อัพเดตคะแนนร้อยละเรียบร้อย",
+      color: "success",
+    })
+  }
+  openModalPercent.value = false
+  percentage.value = null
 }
 
 onMounted(() => {

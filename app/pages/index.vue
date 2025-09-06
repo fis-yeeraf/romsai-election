@@ -21,7 +21,7 @@
     <div
       class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center text-white"
     >
-      <h2 class="text-[50px] font-bold leading-[1]">50</h2>
+      <h2 class="text-[50px] font-bold leading-[1]">{{ percentage?.finished }}</h2>
       <p class="text-[20px]">นับแล้วร้อยละ</p>
     </div>
     <div class="container mx-auto">
@@ -79,7 +79,8 @@ import type { RealtimeChannel } from "@supabase/supabase-js"
 
 const client = useSupabaseClient()
 
-let realtimeChannel: RealtimeChannel
+let realtimeVoteChannel: RealtimeChannel
+let realtimePercentageChannel: RealtimeChannel
 
 const { data: summaryVoteByStations, refresh: refreshSummaryVoteByStations } = await useAsyncData<
   SummaryVoteByStation[] | null
@@ -90,14 +91,26 @@ const { data: summaryVoteByStations, refresh: refreshSummaryVoteByStations } = a
 
 onMounted(() => {
   // Real time listener for new workouts
-  realtimeChannel = client
+  realtimeVoteChannel = client
     .channel("public:vote_results")
     .on("postgres_changes", { event: "*", schema: "public", table: "vote_results" }, () => {
       refreshSummaryVoteByStations()
       refreshCandidateSummaryVote()
     })
 
-  realtimeChannel.subscribe()
+  realtimeVoteChannel.subscribe()
+
+  // Real time listener for new workouts
+  realtimePercentageChannel = client
+    .channel("public:percentage")
+    .on("postgres_changes", { event: "*", schema: "public", table: "percentage" }, () => {
+      refreshPercentage()
+    })
+
+  realtimePercentageChannel.subscribe()
+
+  updateTime()
+  setInterval(updateTime, 1000)
 })
 
 const { data: candidates } = await useAsyncData<Candidate[] | null>(
@@ -118,6 +131,14 @@ const { data: candidateSummaryVote, refresh: refreshCandidateSummaryVote } = awa
   return data as CandidateSummaryVoteByStation[]
 })
 
+const { data: percentage, refresh: refreshPercentage } = await useAsyncData<{
+  finished: number | string | null
+}>("percentage", async (): Promise<{ finished: number | string | null }> => {
+  const { data } = await client.from("percentage").select("*").single()
+
+  return data as unknown as { finished: number | string | null }
+})
+
 const currentTime = ref("")
 const updateTime = () => {
   const now = new Date()
@@ -129,13 +150,9 @@ const updateTime = () => {
   })
 }
 
-onMounted(() => {
-  updateTime()
-  setInterval(updateTime, 1000)
-})
-
 onUnmounted(() => {
-  realtimeChannel.unsubscribe()
+  realtimeVoteChannel.unsubscribe()
+  realtimePercentageChannel.unsubscribe()
 })
 </script>
 <style scoped>
