@@ -14,6 +14,9 @@ export default defineNuxtConfig({
       exclude: ["/"],
     },
   },
+  alias: {
+    "~/shared": "../shared",
+  },
   css: ["@/assets/css/main.css"],
   ui: {
     colorMode: false,

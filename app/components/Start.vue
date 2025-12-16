@@ -19,7 +19,7 @@
       <div
         v-for="(candidate, index) in candidates"
         :key="index"
-        class="bg-gray-100 h-[30vh] xl:h-[60vh] overflow-hidden candidate-image"
+        class="bg-gray-100 h-[30vh] xl:h-[65vh] overflow-hidden candidate-image"
         :class="`xl:w-[${100 / candidates.length}vw] w-[${100 / (candidates.length / 2)}vw]`"
       >
         <div
@@ -41,7 +41,7 @@
       style="animation-delay: 1s"
     >
       <h1
-        class="flex flex-col gap-3 items-center text-white font-bold text-7xl 2xl:text-9xl text-center text-shadow-lg text-shadow-gray-500/50"
+        class="flex justify-center gap-3 items-center text-white font-bold text-7xl 2xl:text-9xl text-center text-shadow-lg text-shadow-gray-500/50"
       >
         <span class="text-2xl 2xl:text-5xl">เหลืออีก</span>
         <span class="font-mono">{{ countdownDays }}</span>
@@ -49,7 +49,7 @@
       </h1>
     </div>
 
-    <div class="footer-alfa h-[30vh] absolute bottom-[30vh] left-0 right-0"></div>
+    <div class="footer-alfa h-[25vh] absolute bottom-[30vh] left-0 right-0"></div>
 
     <footer class="h-[30vh] absolute bottom-0 left-0 right-0">
       <div

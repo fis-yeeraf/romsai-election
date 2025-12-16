@@ -1,18 +1,19 @@
-interface Candidate {
+export interface Candidate {
   id: string
   first_name: string
   last_name: string
   number: number
   avatar?: string
+  village_number: number
 }
 
-interface PollingStation {
+export interface PollingStation {
   id: string
   name: string
   address: string
 }
 
-interface VoteResult {
+export interface VoteResult {
   id?: string
   candidate_id: string
   polling_station_id: string
@@ -21,7 +22,7 @@ interface VoteResult {
   updated_at?: string
 }
 
-interface CandidateSummaryVoteByStation {
+export interface CandidateSummaryVoteByStation {
   id?: string
   number: number
   candidate_name: string
@@ -29,8 +30,29 @@ interface CandidateSummaryVoteByStation {
   total_votes: number
 }
 
-interface SummaryVoteByStation {
+export interface SummaryVoteByStation {
   station_id: string
   station_name: string
   candidates: CandidateSummaryVoteByStation[]
+}
+
+export interface CandidateVoteSummary {
+  village_number: number
+  village_name: string
+  number: number
+  first_name: string
+  last_name: string
+  avatar?: string
+  total_votes: number
+  last_updated: Date
+}
+
+export interface CandidateVoteSummaryByStation {
+  station_name: string
+  village_number: number
+  candidate_number: number
+  first_name: string
+  last_name: string
+  total_votes: number
+  last_updated: Date
 }
