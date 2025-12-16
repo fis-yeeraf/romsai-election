@@ -15,11 +15,11 @@
       </div>
     </header>
 
-    <main class="flex xl:flex-nowrap flex-wrap xl:gap-1">
+    <main class="flex xl:gap-1">
       <div
         v-for="(candidate, index) in candidates"
         :key="index"
-        class="bg-gray-100 h-[30vh] xl:h-[65vh] overflow-hidden candidate-image"
+        class="bg-gray-100 h-[65vh] overflow-hidden candidate-image"
         :class="`xl:w-[${100 / candidates.length}vw] w-[${100 / (candidates.length / 2)}vw]`"
       >
         <div
@@ -35,39 +35,36 @@
       </div>
     </main>
 
-    <div
-      v-if="countdownDays > 0"
-      class="z-10 absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-fade-in-down"
-      style="animation-delay: 1s"
-    >
-      <h1
-        class="flex justify-center gap-3 items-center text-white font-bold text-7xl 2xl:text-9xl text-center text-shadow-lg text-shadow-gray-500/50"
-      >
-        <span class="text-2xl 2xl:text-5xl">เหลืออีก</span>
-        <span class="font-mono">{{ countdownDays }}</span>
-        <span class="text-5xl 2xl:text-7xl">วัน</span>
-      </h1>
-    </div>
-
-    <div class="footer-alfa h-[25vh] absolute bottom-[30vh] left-0 right-0"></div>
+    <div class="footer-alfa h-[25vh] absolute bottom-[29vh] 2xl:bottom-[30vh] left-0 right-0"></div>
 
     <footer class="h-[30vh] absolute bottom-0 left-0 right-0">
       <div
-        v-if="countdownDays <= 0"
-        class="absolute -top-[50px] left-0 right-0 flex flex-col items-center justify-center"
+        class="flex items-center gap-3 z-10 absolute left-1/2 bottom-[200px] 2xl:bottom-[500px] transform -translate-x-1/2 animate-fade-in-down"
+        style="animation-delay: 1s"
+      >
+        <NumberFlip :number="countdownDays" />
+        <div
+          class="flex flex-col justify-between items-center text-white font-bold text-shadow-lg text-shadow-gray-500/50"
+        >
+          <span class="text-4xl my-3">เหลืออีก</span>
+          <span class="text-8xl">วัน</span>
+        </div>
+      </div>
+      <div
+        class="absolute bottom-[50px] 2xl:bottom-[250px] left-0 right-0 flex flex-col items-center justify-center"
       >
         <h2
-          class="text-white text-center font-bold text-7xl text-shadow-lg text-shadow-gray-500/50 heading-text relative"
+          class="text-white text-center font-bold text-5xl 2xl:text-7xl text-shadow-lg text-shadow-gray-500/50 heading-text relative"
         >
           เกาะติด
         </h2>
         <h3
-          class="text-white text-center font-bold text-5xl text-shadow-lg text-shadow-gray-500/50 mt-2"
+          class="text-white text-center font-bold text-4xl 2xl:text-7xl text-shadow-lg text-shadow-gray-500/50 mt-2 2xl:mt-4"
         >
           ผลการเลือกตั้งสมาชิกสภา
         </h3>
         <p
-          class="text-white text-center font-bold text-4xl text-shadow-lg text-shadow-gray-500/50 mt-4"
+          class="text-white text-center font-bold text-3xl 2xl:text-4xl text-shadow-lg text-shadow-gray-500/50 2xl:mt-4"
         >
           องค์การบริหารส่วนตำบลร่มไทร
         </p>
