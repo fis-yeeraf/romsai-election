@@ -1,33 +1,49 @@
 <template>
   <div
-    class="relative min-h-screen flex flex-col justify-between 2xl:justify-around 2xl:py-10 items-center bg-gray-300"
+    class="absolute left-0 right-0 top-0 bottom-0 opacity-40 -scale-y-100"
+    :style="{
+      background: 'url(/images/bg.png) center center/cover no-repeat',
+    }"
+  ></div>
+  <div
+    class="relative min-h-screen flex flex-col justify-between 2xl:justify-around 2xl:py-10 items-center"
   >
     <div class="w-5xl mx-auto py-5">
-      <section class="mx-5 grid grid-cols-4 gap-4">
-        <div class="col-span-2">
-          <h1 class="text-6xl font-bold text-gray-900/50 mb-3">คะแนนผู้สมัคร</h1>
-          <h3 class="text-2xl font-bold text-gray-600">ณ เวลา 18.00 น. 11 ม.ค. 69</h3>
-        </div>
-        <!-- <div class="flex justify-center items-center">
-          <div
-            class="w-[100px] h-[100px] rotate-45 flex items-center justify-center transition-all duration-1000"
-            :class="`bg-${bgColors[villageNumber - 1]}`"
-          >
-            <h2 class="text-white text-5xl font-bold -rotate-45 origin-center font-mono">
-              {{ villageNumber }}
-            </h2>
+      <section class="mx-5 flex justify-between items-center">
+        <div class="flex gap-3">
+          <div>
+            <h1 class="text-6xl font-bold text-primary mb-3 text-shadow-sm text-shadow-gray-500/50">
+              คะแนนผู้สมัคร
+            </h1>
+            <h3 class="text-2xl font-bold text-gray-600">ณ เวลา 18.00 น. 11 ม.ค. 69</h3>
           </div>
-        </div> -->
-        <div class="flex flex-col justify-between items-center gap-2">
-          <h3 class="text-xl font-bold text-gray-900/50 text-center">เขตที่</h3>
-          <h2 class="text-6xl font-bold text-gray-600 font-mono">{{ villageNumber }}</h2>
+          <div class="flex flex-col text-white">
+            <div
+              class="z-10 text-2xl font-bold px-8 pt-2 border-b rounded-t-lg transition-all duration-1000"
+              :class="`bg-${bgColors[villageNumber - 1]}`"
+            >
+              เขตที่
+            </div>
+            <div
+              style="clip-path: polygon(0% 0%, 100% 0, 100% 75%, 50% 100%, 0 75%)"
+              :class="`bg-${bgColors[villageNumber - 1]}`"
+              class="text-center text-6xl font-bold font-mono pb-6 pt-2 transition-all duration-1000"
+            >
+              <div :key="villageNumber" class="transition-all duration-1000 animate-fade-in-down">
+                {{ villageNumber }}
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="flex flex-col justify-between items-center gap-2">
+        <div class="flex flex-col justify-between items-center">
           <h3 class="text-xl font-bold text-gray-900/50 text-center leading-5">
             นับคะแนนแล้ว <br />
             <span class="text-sm font-bold">(อย่างไม่เป็นทางการ)</span>
           </h3>
           <h2 class="text-6xl font-bold text-gray-600 font-mono">70%</h2>
+          <h3 class="text-sm font-bold text-gray-900/50 text-center leading-5">
+            จำนวนผู้มาใช้สิทธิ์ทั้งหมด 123,456 คน
+          </h3>
         </div>
       </section>
     </div>
@@ -76,7 +92,7 @@ import type { Candidate, CandidateVoteSummary, CandidateVoteSummaryByStation } f
 const client = useSupabaseClient()
 const villageNumber = ref(1)
 let changeVillageInterval: ReturnType<typeof setInterval> | null = null
-const bgColors = ["red", "orange", "yellow", "green", "blue"]
+const bgColors = ["primary", "warning", "[#464644]", "error", "info"]
 
 const { data: candidateVoteByStations, refresh: refreshCandidateVoteByStations } =
   await useAsyncData<CandidateVoteSummaryByStation[] | null>(
