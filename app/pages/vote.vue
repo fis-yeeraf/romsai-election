@@ -9,10 +9,19 @@
     class="relative min-h-screen flex flex-col justify-between 2xl:justify-around 2xl:py-10 items-center"
   >
     <div class="w-5xl mx-auto py-5">
-      <section class="mx-5 flex justify-between items-center">
+      <section class="mx-5 flex justify-between items-center gap-5">
+        <div class="flex flex-col justify-between items-center gap-6">
+          <div class="flex gap-5">
+            <img src="/images/ggt.png" alt="ggt Logo" class="h-20 object-contain" />
+            <img src="/images/logo.png" alt="Logo" class="h-20 object-contain" />
+          </div>
+          <h1 class="text-primary text-md font-bold text-shadow-sm text-shadow-gray-300/50">
+            องค์การบริหารส่วนตำบลร่มไทร
+          </h1>
+        </div>
         <div class="flex gap-3">
-          <div>
-            <h1 class="text-6xl font-bold text-primary mb-3 text-shadow-sm text-shadow-gray-500/50">
+          <div class="flex flex-col justify-between">
+            <h1 class="text-6xl font-bold text-primary text-shadow-sm text-shadow-gray-500/50">
               คะแนนผู้สมัคร
             </h1>
             <h3 class="text-2xl font-bold text-gray-600">ณ เวลา 18.00 น. 11 ม.ค. 69</h3>

@@ -23,7 +23,7 @@
         :class="`xl:w-[${100 / candidates.length}vw] w-[${100 / (candidates.length / 2)}vw]`"
       >
         <div
-          class="h-full grayscale-50 animate-fade-in-down"
+          class="h-full animate-fade-in-down"
           :style="{
             backgroundImage: 'url(/images/' + candidate + '.png)',
             backgroundSize: 'auto 85%',
@@ -39,19 +39,25 @@
 
     <footer class="h-[30vh] absolute bottom-0 left-0 right-0">
       <div
-        class="flex items-center gap-3 z-10 absolute left-1/2 bottom-[200px] 2xl:bottom-[500px] transform -translate-x-1/2 animate-fade-in-down"
+        class="flex justify-center left-0 right-0 items-center gap-4 z-10 absolute bottom-[200px] 2xl:bottom-[450px] animate-fade-in-down"
         style="animation-delay: 1s"
       >
+        <h2 class="text-white font-bold text-shadow-lg text-shadow-gray-500/50 text-4xl">
+          เหลืออีก
+        </h2>
         <NumberFlip :number="countdownDays" />
-        <div
+        <h2 class="text-white font-bold text-shadow-lg text-shadow-gray-500/50 text-4xl pr-18">
+          วัน
+        </h2>
+        <!-- <div
           class="flex flex-col justify-between items-center text-white font-bold text-shadow-lg text-shadow-gray-500/50"
         >
           <span class="text-4xl my-3">เหลืออีก</span>
           <span class="text-8xl">วัน</span>
-        </div>
+        </div> -->
       </div>
       <div
-        class="absolute bottom-[50px] 2xl:bottom-[250px] left-0 right-0 flex flex-col items-center justify-center"
+        class="absolute bottom-[80px] 2xl:bottom-[250px] left-0 right-0 flex flex-col items-center justify-center"
       >
         <h2
           class="text-white text-center font-bold text-5xl 2xl:text-7xl text-shadow-lg text-shadow-gray-500/50 heading-text relative"
@@ -61,13 +67,13 @@
         <h3
           class="text-white text-center font-bold text-4xl 2xl:text-7xl text-shadow-lg text-shadow-gray-500/50 mt-2 2xl:mt-4"
         >
-          ผลการเลือกตั้งสมาชิกสภา
+          ผลการเลือกตั้งสมาชิกสภาองค์การบริหารส่วนตำบลร่มไทร
         </h3>
-        <p
+        <!-- <p
           class="text-white text-center font-bold text-3xl 2xl:text-4xl text-shadow-lg text-shadow-gray-500/50 2xl:mt-4"
         >
           องค์การบริหารส่วนตำบลร่มไทร
-        </p>
+        </p> -->
       </div>
     </footer>
   </div>
@@ -95,8 +101,11 @@ const candidates = ref<string[]>([
 const countdownDays = ref(0)
 
 const calculateDaysLeft = () => {
-  const targetDate = new Date("2026-01-11")
+  const targetDate = new Date("2026-01-11 00:00:00")
   const today = new Date()
+
+  console.log(targetDate, today)
+
   const timeDiff = targetDate.getTime() - today.getTime()
   const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24))
   countdownDays.value = daysLeft > 0 ? daysLeft : 0

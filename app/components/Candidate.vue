@@ -20,7 +20,7 @@
           </div> -->
         </div>
         <div
-          class="bg-gray-100 -skew-x-30 origin-center absolute top-22 left-0 right-7 py-3 flex gap-5 items-end justify-center"
+          class="bg-gray-300 -skew-x-30 origin-center absolute top-22 left-0 right-7 py-3 flex gap-5 items-end justify-center"
         >
           <div class="text-5xl font-bold skew-x-30 origin-center font-mono">
             <!-- {{ totalVotes?.toLocaleString() ?? "0" }} -->
