@@ -56,3 +56,13 @@ export interface CandidateVoteSummaryByStation {
   total_votes: number
   last_updated: Date
 }
+
+export interface BallotByVillage {
+  village_number: number
+  village_name: string
+  candidate_type: string
+  candidate_type_code: string
+  valid_vote: number
+  invalid_vote: number
+  no_vote: number
+}

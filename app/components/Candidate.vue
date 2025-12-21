@@ -39,7 +39,8 @@
           >
             <div class="text-xs font-bold skew-x-30 origin-center">{{ station.station_name }}</div>
             <div class="text-md font-bold skew-x-30 origin-center font-mono leading-0 pl-3">
-              {{ station.total_votes?.toLocaleString() ?? "0" }}
+              <!-- {{ station.total_votes?.toLocaleString() ?? "0" }} -->
+              {{ "123,456" }}
             </div>
           </div>
         </div>

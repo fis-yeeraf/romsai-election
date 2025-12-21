@@ -1,6 +1,6 @@
 <template>
   <div class="relative min-h-screen">
-    <header class="h-[120px]">
+    <header class="h-[150px]">
       <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-full">
         <img src="/images/ggt.png" alt="Election System Logo" class="h-[100px] object-contain" />
         <div class="text-white flex flex-col items-center gap-1">
@@ -35,9 +35,9 @@
       </div>
     </main>
 
-    <div class="footer-alfa h-[25vh] absolute bottom-[29vh] left-0 right-0"></div>
+    <div class="footer-alfa h-[25vh] absolute bottom-[32vh] left-0 right-0"></div>
 
-    <footer class="h-[30vh] absolute bottom-0 left-0 right-0">
+    <footer class="h-[32vh] absolute bottom-0 left-0 right-0">
       <div
         class="flex justify-center left-0 right-0 items-center gap-4 z-10 absolute bottom-[200px] 2xl:bottom-[300px] animate-fade-in-down"
         style="animation-delay: 1s"

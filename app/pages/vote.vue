@@ -5,17 +5,15 @@
       background: 'url(/images/bg.png) center center/cover no-repeat',
     }"
   ></div>
-  <div
-    class="relative min-h-screen flex flex-col justify-between 2xl:justify-around 2xl:py-10 items-center"
-  >
-    <div class="w-5xl mx-auto py-5">
+  <div class="relative min-h-screen flex flex-col justify-between items-center py-20">
+    <div class="w-7xl mx-auto py-5">
       <section class="mx-5 flex justify-between items-center gap-5">
-        <div class="flex flex-col justify-between items-center gap-6">
+        <div class="flex flex-col justify-between items-center gap-2">
           <div class="flex gap-5">
-            <img src="/images/ggt.png" alt="ggt Logo" class="h-20 object-contain" />
-            <img src="/images/logo.png" alt="Logo" class="h-20 object-contain" />
+            <img src="/images/ggt.png" alt="ggt Logo" class="h-25 object-contain" />
+            <img src="/images/logo.png" alt="Logo" class="h-25 object-contain" />
           </div>
-          <h1 class="text-primary text-md font-bold text-shadow-sm text-shadow-gray-300/50">
+          <h1 class="text-primary text-xl font-bold text-shadow-sm text-shadow-gray-300/50">
             องค์การบริหารส่วนตำบลร่มไทร
           </h1>
         </div>
@@ -56,9 +54,9 @@
         </div>
       </section>
     </div>
-    <div class="w-7xl mx-auto">
+    <div class="w-7xl mx-auto pb-30">
       <section class="mx-5">
-        <div class="flex justify-center items-center mb-30">
+        <div class="flex justify-center items-center gap-5">
           <CandidateComponent
             v-for="(candidate, key) in candidates?.filter(
               (c) => c.village_number === villageNumber
@@ -78,8 +76,8 @@
         </div>
       </section>
     </div>
-    <div class="flex mb-5">
-      <UButton
+    <div class="w-7xl mx-auto">
+      <!-- <UButton
         v-for="(village_number, index) in 5"
         :key="index"
         :label="`Village ${village_number}`"
@@ -89,14 +87,41 @@
         :color="villageNumber === village_number ? 'primary' : 'neutral'"
         class="mx-2 my-2 cursor-pointer"
         @click="onHandleChangeVillage(village_number)"
-      />
+      /> -->
+      <div class="flex">
+        <div v-for="(_, index) in 3" :key="index" class="flex-1 flex flex-col">
+          <h2 class="text-xl font-semibold pl-6">
+            {{ index === 0 ? "บัตรดี" : index === 1 ? "บัตรเสีย" : "งดออกเสียง" }}
+          </h2>
+          <div
+            class="py-3 text-2xl font-bold text-center -skew-x-30 origin-center"
+            :class="`bg-${index === 0 ? 'primary' : index === 1 ? 'error' : 'secondary'}`"
+          >
+            <h2 class="skew-x-30 origin-center text-white">
+              {{
+                index === 0
+                  ? ballotByVillage?.valid_vote ?? 0
+                  : index === 1
+                  ? ballotByVillage?.invalid_vote ?? 0
+                  : ballotByVillage?.no_vote ?? 0
+              }}
+              ใบ
+            </h2>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { ref } from "vue"
 import CandidateComponent from "~/components/Candidate.vue"
-import type { Candidate, CandidateVoteSummary, CandidateVoteSummaryByStation } from "~/shared/types"
+import type {
+  Candidate,
+  CandidateVoteSummary,
+  CandidateVoteSummaryByStation,
+  BallotByVillage,
+} from "~/shared/types"
 
 const client = useSupabaseClient()
 const villageNumber = ref(1)
@@ -150,6 +175,19 @@ const { data: voteSummary, refresh: refreshVoteSummary } = await useAsyncData<
   })) as CandidateVoteSummary[]
 })
 
+const { data: ballotByVillage, refresh: refreshBallotByVillage } =
+  await useAsyncData<BallotByVillage | null>(
+    "BallotByVillage",
+    async (): Promise<BallotByVillage | null> => {
+      const { data } = await client
+        .from("ballot_by_village")
+        .select("*")
+        .eq("village_number", villageNumber.value)
+        .eq("candidate_type_code", "council")
+      return data as BallotByVillage | null
+    }
+  )
+
 const getShuffledColors = () => {
   const colors = ["error", "success", "info"]
   for (let i = colors.length - 1; i > 0; i--) {
@@ -175,6 +213,7 @@ const onHandleChangeVillage = (village_number: number) => {
     villageNumber.value = village_number
     refreshCandidateVoteByStations()
     refreshVoteSummary()
+    refreshBallotByVillage()
   }, 1000)
 }
 
