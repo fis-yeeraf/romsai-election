@@ -11,6 +11,7 @@ export interface PollingStation {
   id: string
   name: string
   address: string
+  village_number?: number
 }
 
 export interface VoteResult {
@@ -48,6 +49,7 @@ export interface CandidateVoteSummary {
 }
 
 export interface CandidateVoteSummaryByStation {
+  station_id: string
   station_name: string
   village_number: number
   candidate_number: number
@@ -62,7 +64,27 @@ export interface BallotByVillage {
   village_name: string
   candidate_type: string
   candidate_type_code: string
-  valid_vote: number
-  invalid_vote: number
-  no_vote: number
+  valid_votes: number
+  invalid_votes: number
+  no_votes: number
+}
+
+export interface BallotByStation {
+  station_id: string
+  village_number: number
+  village_name: string
+  candidate_type_code: string
+  valid_votes: number
+  invalid_votes: number
+  no_votes: number
+  total_ballots: number
+}
+
+export interface RecordVote {
+  stationName: string
+  villageNumber: number
+  candidateNumber: number | null | string
+  candidateType: "mayor" | "council"
+  ballotType: "valid" | "invalid" | "no_vote"
+  score: number
 }

@@ -166,8 +166,7 @@ watch(percentage, (v) => {
 })
 
 onUnmounted(() => {
-  realtimeVoteChannel.unsubscribe()
-  realtimePercentageChannel.unsubscribe()
+  client.removeAllChannels()
 })
 </script>
 <style scoped>

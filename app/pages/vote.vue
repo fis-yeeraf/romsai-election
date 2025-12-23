@@ -5,15 +5,20 @@
       background: 'url(/images/bg.png) center center/cover no-repeat',
     }"
   ></div>
-  <div class="relative min-h-screen flex flex-col justify-between items-center py-20">
-    <div class="w-7xl mx-auto py-5">
+  <div
+    class="relative min-h-screen flex flex-col justify-between 2xl:justify-around items-center py-5"
+  >
+    <div class="w-full max-w-7xl mx-auto py-5">
       <section class="mx-5 flex justify-between items-center gap-5">
         <div class="flex flex-col justify-between items-center gap-2">
           <div class="flex gap-5">
             <img src="/images/ggt.png" alt="ggt Logo" class="h-25 object-contain" />
             <img src="/images/logo.png" alt="Logo" class="h-25 object-contain" />
           </div>
-          <h1 class="text-primary text-xl font-bold text-shadow-sm text-shadow-gray-300/50">
+          <h1
+            class="text-primary text-center text-xl font-bold text-shadow-sm text-shadow-gray-300/50 leading-5"
+          >
+            การเลือกตั้งสมาชิกสภา <br />
             องค์การบริหารส่วนตำบลร่มไทร
           </h1>
         </div>
@@ -43,18 +48,18 @@
           </div>
         </div>
         <div class="flex flex-col justify-between items-center">
-          <h3 class="text-xl font-bold text-gray-900/50 text-center leading-5">
+          <h3 class="text-xl font-bold text-gray-900/70 text-center leading-5">
             นับคะแนนแล้ว <br />
             <span class="text-sm font-bold">(อย่างไม่เป็นทางการ)</span>
           </h3>
-          <h2 class="text-6xl font-bold text-gray-600 font-mono">70%</h2>
-          <h3 class="text-sm font-bold text-gray-900/50 text-center leading-5">
+          <h2 class="text-6xl font-bold text-gray-900 font-mono">70%</h2>
+          <h3 class="text-sm font-bold text-gray-900/70 text-center leading-5">
             จำนวนผู้มาใช้สิทธิ์ทั้งหมด 123,456 คน
           </h3>
         </div>
       </section>
     </div>
-    <div class="w-7xl mx-auto pb-30">
+    <div class="w-full max-w-7xl mx-auto mb-40">
       <section class="mx-5">
         <div class="flex justify-center items-center gap-5">
           <CandidateComponent
@@ -76,7 +81,7 @@
         </div>
       </section>
     </div>
-    <div class="w-7xl mx-auto">
+    <div class="w-full max-w-7xl mx-auto px-5">
       <!-- <UButton
         v-for="(village_number, index) in 5"
         :key="index"
@@ -88,22 +93,28 @@
         class="mx-2 my-2 cursor-pointer"
         @click="onHandleChangeVillage(village_number)"
       /> -->
-      <div class="flex">
+      <div v-for="(ballotByVillage, key) in ballotByVillages" :key="key" class="flex">
         <div v-for="(_, index) in 3" :key="index" class="flex-1 flex flex-col">
           <h2 class="text-xl font-semibold pl-6">
             {{ index === 0 ? "บัตรดี" : index === 1 ? "บัตรเสีย" : "งดออกเสียง" }}
           </h2>
           <div
-            class="py-3 text-2xl font-bold text-center -skew-x-30 origin-center"
-            :class="`bg-${index === 0 ? 'primary' : index === 1 ? 'error' : 'secondary'}`"
+            class="py-2 text-lg font-bold text-center -skew-x-30 origin-center"
+            :class="`bg-${
+              index === 0
+                ? 'primary text-white'
+                : index === 1
+                ? 'error text-white'
+                : 'gray-300 text-gray-900'
+            }`"
           >
-            <h2 class="skew-x-30 origin-center text-white">
+            <h2 class="skew-x-30 origin-center">
               {{
                 index === 0
-                  ? ballotByVillage?.valid_vote ?? 0
+                  ? ballotByVillage?.valid_votes ?? 0
                   : index === 1
-                  ? ballotByVillage?.invalid_vote ?? 0
-                  : ballotByVillage?.no_vote ?? 0
+                  ? ballotByVillage?.invalid_votes ?? 0
+                  : ballotByVillage?.no_votes ?? 0
               }}
               ใบ
             </h2>
@@ -122,11 +133,14 @@ import type {
   CandidateVoteSummaryByStation,
   BallotByVillage,
 } from "~/shared/types"
+import type { RealtimeChannel } from "@supabase/supabase-js"
 
 const client = useSupabaseClient()
 const villageNumber = ref(1)
 let changeVillageInterval: ReturnType<typeof setInterval> | null = null
 const bgColors = ["primary", "warning", "[#464644]", "error", "info"]
+
+let realtimeVoteResultChannel: RealtimeChannel
 
 const { data: candidateVoteByStations, refresh: refreshCandidateVoteByStations } =
   await useAsyncData<CandidateVoteSummaryByStation[] | null>(
@@ -175,18 +189,16 @@ const { data: voteSummary, refresh: refreshVoteSummary } = await useAsyncData<
   })) as CandidateVoteSummary[]
 })
 
-const { data: ballotByVillage, refresh: refreshBallotByVillage } =
-  await useAsyncData<BallotByVillage | null>(
-    "BallotByVillage",
-    async (): Promise<BallotByVillage | null> => {
-      const { data } = await client
-        .from("ballot_by_village")
-        .select("*")
-        .eq("village_number", villageNumber.value)
-        .eq("candidate_type_code", "council")
-      return data as BallotByVillage | null
-    }
-  )
+const { data: ballotByVillages, refresh: refreshBallotByVillages } = await useAsyncData<
+  BallotByVillage[] | []
+>("BallotByVillage", async (): Promise<BallotByVillage[] | []> => {
+  const { data } = await client
+    .from("ballot_by_village")
+    .select("*")
+    .eq("village_number", villageNumber.value)
+    .eq("candidate_type_code", "council")
+  return data as BallotByVillage[] | []
+})
 
 const getShuffledColors = () => {
   const colors = ["error", "success", "info"]
@@ -213,7 +225,7 @@ const onHandleChangeVillage = (village_number: number) => {
     villageNumber.value = village_number
     refreshCandidateVoteByStations()
     refreshVoteSummary()
-    refreshBallotByVillage()
+    refreshBallotByVillages()
   }, 1000)
 }
 
@@ -221,21 +233,38 @@ const shuffledColors = Array(5)
   .fill(null)
   .map(() => getShuffledColors())
 
-// onMounted(() => {
-//   changeVillageInterval = setInterval(() => {
-//     if (villageNumber.value >= 5) {
-//       onHandleChangeVillage(1)
-//     } else {
-//       onHandleChangeVillage(villageNumber.value + 1)
-//     }
-//   }, 10000) // Change every 10 seconds
-// })
+onMounted(() => {
+  changeVillageInterval = setInterval(() => {
+    if (villageNumber.value >= 5) {
+      onHandleChangeVillage(1)
+    } else {
+      onHandleChangeVillage(villageNumber.value + 1)
+    }
+  }, 10000) // Change every 10 seconds
 
-// onUnmounted(() => {
-//   if (changeVillageInterval) {
-//     clearInterval(changeVillageInterval)
-//   }
-// })
+  realtimeVoteResultChannel = client
+    .channel("custom-all-channel")
+    .on("postgres_changes", { event: "*", schema: "public", table: "votes" }, () => {
+      if (villageNumber.value === 2) {
+        refreshCandidateVoteByStations()
+      }
+      refreshVoteSummary()
+      refreshBallotByVillages()
+    })
+    .subscribe()
+})
+
+onUnmounted(() => {
+  if (changeVillageInterval) {
+    clearInterval(changeVillageInterval)
+  }
+
+  // Clean up realtime subscription if needed
+  // Note: Supabase handles this automatically in most cases
+  if (realtimeVoteResultChannel) {
+    client.removeChannel(realtimeVoteResultChannel)
+  }
+})
 </script>
 <style scoped>
 @keyframes fade-in-down {

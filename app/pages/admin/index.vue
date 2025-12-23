@@ -1,26 +1,48 @@
 <template>
   <div class="container mx-auto">
-    <UCard>
-      <h1 class="text-2xl font-bold">ลงคะแนนเลือกตั้ง</h1>
+    <UCard class="pb-5">
+      <h1 class="text-2xl font-bold-3">ลงคะแนนเลือกตั้ง</h1>
       <hr class="my-4 border-gray-200" />
       <Station
         :stations="stations"
         :activeStation="selectedStation"
-        @selectStation="selectedStation = $event"
+        @selectStation="onHandleSelectStation"
       />
-      <hr class="my-4 border-gray-200" />
-      <ul v-if="selectedStation" class="grid grid-cols-2 lg:grid-cols-2 gap-5 mb-5">
-        <li v-for="(candidate, index) in candidates" :key="index">
+      <hr v-if="selectedStation" class="my-4 border-gray-200" />
+      <ul v-if="selectedStation" class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <li
+          v-for="(candidate, index) in candidates?.filter(
+            (c) => c.village_number === villageNumber
+          )"
+          :key="index"
+        >
           <CandidateCard
+            :villageNumber="villageNumber"
             :candidate="candidate"
             :stationName="stations?.find((station) => station.id === selectedStation)?.name"
-            :voteCount="summaryVoteByStation.find((vote) => vote.id === candidate.id)?.total_votes"
-            @vote="onHandleVote"
+            :voteCount="
+              summaryVoteByStation?.find(
+                (vote) =>
+                  vote.candidate_number === candidate.number && vote.station_id === selectedStation
+              )?.total_votes
+            "
+            @vote="onRecordVote"
+          />
+        </li>
+        <li v-for="(_, index) in 2" :key="index">
+          <CandidateCard
+            :ballotType="index + 1 === 1 ? 'invalid' : 'no_vote'"
+            :villageNumber="villageNumber"
+            :stationName="stations?.find((station) => station.id === selectedStation)?.name"
+            :voteCount="
+              index + 1 === 1 ? ballotByStation?.invalid_votes ?? 0 : ballotByStation?.no_votes ?? 0
+            "
+            @vote="onRecordVote"
           />
         </li>
       </ul>
-      <template #footer>
-        <div class="flex justify-center">
+      <!-- <template #footer> -->
+      <!-- <div class="flex justify-center">
           <UButton class="cursor-pointer" @click="openModalPercent = true">กรอกคะแนนร้อยละ</UButton>
         </div>
         <UModal v-model:open="openModalPercent" title="กรอกคะแนนร้อยละ" description="">
@@ -33,7 +55,7 @@
           </template>
           <template #footer>
             <div class="w-full flex justify-between">
-              <UButton class="cursor-pointer" @click="openModalPercent = false" color="gray"
+              <UButton class="cursor-pointer" @click="openModalPercent = false" color="secondary"
                 >ยกเลิก</UButton
               >
               <UButton class="cursor-pointer" @click="onUpdatePercentage" color="primary"
@@ -41,31 +63,38 @@
               >
             </div>
           </template>
-        </UModal>
-      </template>
+        </UModal> -->
+      <!-- </template> -->
     </UCard>
   </div>
 </template>
 <script setup lang="ts">
 import type { RealtimeChannel } from "@supabase/supabase-js"
+import type { BallotByStation, RecordVote } from "~~/shared/types"
 
 const toast = useToast()
 const openModalPercent = ref(false)
 const percentage = ref<number | null>(null)
-const errors = ref<string | null>(null)
+const errors = ref<string | boolean | undefined>(undefined)
+const villageNumber = ref(1)
 
 const client = useSupabaseClient()
 
 let realtimeChannel: RealtimeChannel
 
 const { data: candidates } = await useAsyncData<Candidate[] | null>(
-  "candidate",
+  "candidates",
   async (): Promise<Candidate[] | null> => {
     const { data } = await client
       .from("candidates")
-      .select("*")
+      .select("*, villages(village_number)")
+      .not("village_id", "is", null)
       .order("number", { ascending: true })
-    return data as Candidate[]
+    return (data as any[])?.map((item: any) => ({
+      ...item,
+      village_number: item.villages?.village_number ?? villageNumber.value,
+      avatar: `/images/${item.villages?.village_number}-${item.number}.png`,
+    })) as Candidate[]
   }
 )
 
@@ -74,26 +103,48 @@ const { data: stations } = await useAsyncData<PollingStation[] | null>(
   async (): Promise<PollingStation[] | null> => {
     const { data } = await client
       .from("polling_stations")
-      .select("id, name, address")
+      .select("id, name, address, villages(village_number)")
       .order("station_code", { ascending: true })
-    return data as PollingStation[]
+    return (data as any[])?.map((item: any) => ({
+      ...item,
+      village_number: item.villages?.village_number ?? villageNumber.value,
+    })) as PollingStation[]
   }
 )
 
 const selectedStation = ref<string | null>(null)
-const summaryVoteByStation = ref<CandidateSummaryVoteByStation[]>([])
+const summaryVoteByStation = ref<CandidateVoteSummaryByStation[]>([])
+const ballotByStation = ref<BallotByStation | null>(null)
 
 const onLoadSummaryVoteByStation = async () => {
   const { data } = await client
-    .from("candidate_vote_summary_by_stations")
+    .from("council_results_by_stations")
     .select("*")
     .eq("station_id", selectedStation.value!)
-    .order("number", { ascending: true })
-  summaryVoteByStation.value = data as CandidateSummaryVoteByStation[]
+    .order("candidate_number", { ascending: true })
+  summaryVoteByStation.value = data as CandidateVoteSummaryByStation[]
 }
 
-watch(selectedStation, () => {
-  onLoadSummaryVoteByStation()
+const onLoadBallotByStation = async () => {
+  const { data } = await client
+    .from("ballot_by_stations")
+    .select("*")
+    .eq("station_id", selectedStation.value!)
+    .eq("candidate_type_code", "council")
+    .single()
+  ballotByStation.value = data as BallotByStation | null
+}
+
+const onHandleSelectStation = (stationId: string, village: number) => {
+  selectedStation.value = stationId
+  villageNumber.value = village
+}
+
+watch(selectedStation, (value) => {
+  if (value !== null) {
+    onLoadSummaryVoteByStation()
+    onLoadBallotByStation()
+  }
 })
 
 const onHandleVote = async (score: number, candidateId: string) => {
@@ -172,6 +223,40 @@ const onHandleVote = async (score: number, candidateId: string) => {
   }
 }
 
+const onRecordVote = async ({
+  stationName,
+  villageNumber,
+  candidateNumber,
+  candidateType,
+  ballotType,
+  score,
+}: RecordVote) => {
+  const { error } = await client.rpc("record_vote", {
+    station: stationName,
+    p_village_number: villageNumber,
+    candidate_number: candidateNumber,
+    candidate_type: candidateType,
+    ballot_type: ballotType,
+    p_change_amount: score,
+  } as never)
+  if (error) {
+    console.error("Error updating vote:", error)
+    toast.add({
+      title: "เกิดข้อผิดพลาด",
+      description: "เกิดข้อผิดพลาดในการอัพเดตคะแนน",
+      color: "error",
+      duration: 1000,
+    })
+  } else {
+    toast.add({
+      title: "สำเร็จ",
+      description: "อัพเดตคะแนนเรียบร้อย",
+      color: "success",
+      duration: 1000,
+    })
+  }
+}
+
 const onUpdatePercentage = async () => {
   if (percentage.value === null) {
     errors.value = "กรุณากรอกคะแนน"
@@ -202,15 +287,17 @@ const onUpdatePercentage = async () => {
 onMounted(() => {
   // Real time listener for new workouts
   realtimeChannel = client
-    .channel("public:vote_results")
-    .on("postgres_changes", { event: "*", schema: "public", table: "vote_results" }, () =>
+    .channel("custom-all-channel")
+    .on("postgres_changes", { event: "*", schema: "public", table: "votes" }, () => {
       onLoadSummaryVoteByStation()
-    )
-
-  realtimeChannel.subscribe()
+      onLoadBallotByStation()
+    })
+    .subscribe()
 })
 
 onUnmounted(() => {
-  realtimeChannel.unsubscribe()
+  if (realtimeChannel) {
+    client.removeChannel(realtimeChannel)
+  }
 })
 </script>

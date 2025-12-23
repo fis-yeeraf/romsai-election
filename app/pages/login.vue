@@ -50,7 +50,7 @@
             :class="[
               'flex justify-center cursor-pointer',
               'w-full bg-black/10 my-5 text-center',
-              'hover:bg-black/20 border-1 px-3 py-3 text-white border-transparent',
+              'hover:bg-black/20 border px-3 py-3 text-white border-transparent',
               'transition-colors duration-300 shadow-2 rounded-full focus:outline-0 focus:bg-black/30',
             ]"
           />

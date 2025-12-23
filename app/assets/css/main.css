@@ -7,3 +7,12 @@ body {
 }
 
 
+.text-primary {
+  color: var(--color-green-700);
+}
+.bg-primary, .bg-success {
+  background-color: var(--color-green-700);
+}
+
+
+
