@@ -52,9 +52,12 @@
             นับคะแนนแล้ว <br />
             <span class="text-sm font-bold">(อย่างไม่เป็นทางการ)</span>
           </h3>
-          <h2 class="text-6xl font-bold text-gray-900 font-mono">70%</h2>
+          <h2 class="text-6xl font-bold text-gray-900 font-mono">
+            {{ countingProgressByVillage?.counting_percentage ?? 0 }}%
+          </h2>
           <h3 class="text-sm font-bold text-gray-900/70 text-center leading-5">
-            จำนวนผู้มาใช้สิทธิ์ทั้งหมด 123,456 คน
+            จำนวนผู้มาใช้สิทธิ์ทั้งหมด
+            {{ countingProgressByVillage?.total_counted?.toLocaleString() ?? 0 }} คน
           </h3>
         </div>
       </section>
@@ -132,6 +135,7 @@ import type {
   CandidateVoteSummary,
   CandidateVoteSummaryByStation,
   BallotByVillage,
+  CountingProgressByVillage,
 } from "~/shared/types"
 import type { RealtimeChannel } from "@supabase/supabase-js"
 
@@ -200,6 +204,19 @@ const { data: ballotByVillages, refresh: refreshBallotByVillages } = await useAs
   return data as BallotByVillage[] | []
 })
 
+const { data: countingProgressByVillage, refresh: refreshCountingProgressByVillage } =
+  await useAsyncData<CountingProgressByVillage | null>(
+    "CountingProgressByVillage",
+    async (): Promise<CountingProgressByVillage | null> => {
+      const { data } = await client
+        .from("counting_progress_by_villages")
+        .select("*")
+        .eq("village_number", villageNumber.value)
+        .single()
+      return data as CountingProgressByVillage | null
+    }
+  )
+
 const getShuffledColors = () => {
   const colors = ["error", "success", "info"]
   for (let i = colors.length - 1; i > 0; i--) {
@@ -226,6 +243,7 @@ const onHandleChangeVillage = (village_number: number) => {
     refreshCandidateVoteByStations()
     refreshVoteSummary()
     refreshBallotByVillages()
+    refreshCountingProgressByVillage()
   }, 1000)
 }
 
@@ -250,6 +268,7 @@ onMounted(() => {
       }
       refreshVoteSummary()
       refreshBallotByVillages()
+      refreshCountingProgressByVillage()
     })
     .subscribe()
 })

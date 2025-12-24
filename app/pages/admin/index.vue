@@ -6,7 +6,9 @@
       <Station
         :stations="stations"
         :activeStation="selectedStation"
+        :ballotByStation="countingProgressByStation"
         @selectStation="onHandleSelectStation"
+        @updateEligibleVoters="onUpdateEligibleVoters"
       />
       <hr v-if="selectedStation" class="my-4 border-gray-200" />
       <ul v-if="selectedStation" class="grid grid-cols-1 lg:grid-cols-2 gap-3">
@@ -70,13 +72,18 @@
 </template>
 <script setup lang="ts">
 import type { RealtimeChannel } from "@supabase/supabase-js"
-import type { BallotByStation, RecordVote } from "~~/shared/types"
+import type { BallotByStation, CountingProgressByStation, RecordVote } from "~~/shared/types"
 
 const toast = useToast()
 const openModalPercent = ref(false)
 const percentage = ref<number | null>(null)
 const errors = ref<string | boolean | undefined>(undefined)
 const villageNumber = ref(1)
+
+const selectedStation = ref<string | null>(null)
+const summaryVoteByStation = ref<CandidateVoteSummaryByStation[]>([])
+const ballotByStation = ref<BallotByStation | null>(null)
+const countingProgressByStation = ref<CountingProgressByStation | null>(null)
 
 const client = useSupabaseClient()
 
@@ -112,10 +119,6 @@ const { data: stations } = await useAsyncData<PollingStation[] | null>(
   }
 )
 
-const selectedStation = ref<string | null>(null)
-const summaryVoteByStation = ref<CandidateVoteSummaryByStation[]>([])
-const ballotByStation = ref<BallotByStation | null>(null)
-
 const onLoadSummaryVoteByStation = async () => {
   const { data } = await client
     .from("council_results_by_stations")
@@ -135,6 +138,16 @@ const onLoadBallotByStation = async () => {
   ballotByStation.value = data as BallotByStation | null
 }
 
+const onLoadCountingProgressByStation = async () => {
+  const { data } = await client
+    .from("counting_progress_by_stations")
+    .select("*")
+    .eq("station_id", selectedStation.value!)
+    .eq("candidate_type_code", "council")
+    .single()
+  countingProgressByStation.value = data as CountingProgressByStation | null
+}
+
 const onHandleSelectStation = (stationId: string, village: number) => {
   selectedStation.value = stationId
   villageNumber.value = village
@@ -144,8 +157,41 @@ watch(selectedStation, (value) => {
   if (value !== null) {
     onLoadSummaryVoteByStation()
     onLoadBallotByStation()
+    onLoadCountingProgressByStation()
   }
 })
+
+const onUpdateEligibleVoters = async (voters: number) => {
+  try {
+    const { error } = await client
+      .from("polling_stations")
+      .update({ total_eligible_voters: voters } as never)
+      .eq("id", selectedStation.value!)
+
+    if (error) {
+      console.error("Error updating vote:", error)
+      toast.add({
+        title: "เกิดข้อผิดพลาด",
+        description: "เกิดข้อผิดพลาดในการอัพเดตผู้มาใช้สิทธิ์",
+        color: "error",
+      })
+    } else {
+      toast.add({
+        title: "สำเร็จ",
+        description: "อัพเดตผู้มาใช้สิทธิ์เรียบร้อย",
+        color: "success",
+      })
+    }
+  } catch (error) {
+    toast.add({
+      title: "เกิดข้อผิดพลาด",
+      description: "เกิดข้อผิดพลาดในการอัพเดตผู้มาใช้สิทธิ์",
+      color: "error",
+    })
+  } finally {
+    onLoadCountingProgressByStation()
+  }
+}
 
 const onHandleVote = async (score: number, candidateId: string) => {
   if (!selectedStation.value) {
@@ -291,6 +337,7 @@ onMounted(() => {
     .on("postgres_changes", { event: "*", schema: "public", table: "votes" }, () => {
       onLoadSummaryVoteByStation()
       onLoadBallotByStation()
+      onLoadCountingProgressByStation()
     })
     .subscribe()
 })

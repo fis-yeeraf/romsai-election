@@ -88,3 +88,19 @@ export interface RecordVote {
   ballotType: "valid" | "invalid" | "no_vote"
   score: number
 }
+
+export interface CountingProgressByStation {
+  station_id: string
+  station_name: string
+  village_number: number
+  total_eligible_voters: number
+  total_counted: number
+  counting_percentage: number
+}
+
+export interface CountingProgressByVillage {
+  village_number: number
+  total_eligible_voters: number
+  total_counted: number
+  counting_percentage: number
+}
