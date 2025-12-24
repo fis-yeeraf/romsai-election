@@ -22,10 +22,18 @@
       </li>
       <hr class="my-2 border-gray-200" />
       <li class="flex gap-3">
-        <UButton class="flex-1" @click="$emit('selectStation', null, null)"
+        <UButton
+          class="flex-1 cursor-pointer"
+          color="warning"
+          icon="i-lucide-chevron-left"
+          @click="$emit('selectStation', null, null)"
           >เปลี่ยนหน่วยเลือกตั้ง</UButton
         >
-        <UButton class="flex-1" color="info" @click="openModalEligibleVoters = true"
+        <UButton
+          class="flex-1 cursor-pointer"
+          color="info"
+          icon="i-lucide-cog"
+          @click="openModalEligibleVoters = true"
           >ตั้งค่าผู้มาใช้สิทธิ์</UButton
         >
       </li>
