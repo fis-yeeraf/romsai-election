@@ -27,7 +27,7 @@
             <h1 class="text-6xl font-bold text-primary text-shadow-sm text-shadow-gray-500/50">
               คะแนนผู้สมัคร
             </h1>
-            <h3 class="text-2xl font-bold text-gray-600">ณ เวลา 18.00 น. 11 ม.ค. 69</h3>
+            <h3 class="text-2xl font-bold text-gray-600">ณ {{ currentDateTime }}</h3>
           </div>
           <div class="flex flex-col text-white">
             <div
@@ -57,7 +57,7 @@
           </h2>
           <h3 class="text-sm font-bold text-gray-900/70 text-center leading-5">
             จำนวนผู้มาใช้สิทธิ์ทั้งหมด
-            {{ countingProgressByVillage?.total_counted?.toLocaleString() ?? 0 }} คน
+            {{ countingProgressByVillage?.total_eligible_voters?.toLocaleString() ?? 0 }} คน
           </h3>
         </div>
       </section>
@@ -137,12 +137,15 @@ import type {
   BallotByVillage,
   CountingProgressByVillage,
 } from "~/shared/types"
+import { formatThaiDate } from "~~/shared/utils"
 import type { RealtimeChannel } from "@supabase/supabase-js"
 
 const client = useSupabaseClient()
 const villageNumber = ref(1)
 let changeVillageInterval: ReturnType<typeof setInterval> | null = null
 const bgColors = ["primary", "warning", "[#464644]", "error", "info"]
+const currentDateTime = ref<string | null>(null)
+let changeCurrentDateTimeInterval: ReturnType<typeof setInterval> | null = null
 
 let realtimeVoteResultChannel: RealtimeChannel
 
@@ -260,6 +263,10 @@ onMounted(() => {
     }
   }, 10000) // Change every 10 seconds
 
+  changeCurrentDateTimeInterval = setInterval(() => {
+    currentDateTime.value = formatThaiDate(new Date())
+  }, 1000)
+
   realtimeVoteResultChannel = client
     .channel("custom-all-channel")
     .on("postgres_changes", { event: "*", schema: "public", table: "votes" }, () => {
@@ -276,6 +283,10 @@ onMounted(() => {
 onUnmounted(() => {
   if (changeVillageInterval) {
     clearInterval(changeVillageInterval)
+  }
+
+  if (changeCurrentDateTimeInterval) {
+    clearInterval(changeCurrentDateTimeInterval)
   }
 
   // Clean up realtime subscription if needed
