@@ -53,11 +53,19 @@
             <span class="text-sm font-bold">(อย่างไม่เป็นทางการ)</span>
           </h3>
           <h2 class="text-6xl font-bold text-gray-900 font-mono">
-            {{ countingProgressByVillage?.counting_percentage ?? 0 }}%
+            {{
+              countingProgressByVillages?.find((v) => v.village_number === villageNumber)
+                ?.counting_percentage ?? 0
+            }}%
           </h2>
           <h3 class="text-sm font-bold text-gray-900/70 text-center leading-5">
             จำนวนผู้มาใช้สิทธิ์ทั้งหมด
-            {{ countingProgressByVillage?.total_eligible_voters?.toLocaleString() ?? 0 }} คน
+            {{
+              countingProgressByVillages
+                ?.find((v) => v.village_number === villageNumber)
+                ?.total_eligible_voters?.toLocaleString() ?? 0
+            }}
+            คน
           </h3>
         </div>
       </section>
@@ -77,7 +85,11 @@
                 (station) => station.candidate_number === candidate.number
               ) ?? []
             "
-            :totalVotes="voteSummary?.find((c) => c.number === candidate.number)?.total_votes ?? 0"
+            :totalVotes="
+              voteSummary
+                ?.filter((c) => c.village_number === villageNumber)
+                ?.find((c) => c.number === candidate.number)?.total_votes ?? 0
+            "
             :class="{ 'w-1/3': true, 'animate-fade-in-down': true, 'candidate-card': true }"
             :style="{ animationDelay: key * 0.2 + 's' }"
           />
@@ -96,7 +108,13 @@
         class="mx-2 my-2 cursor-pointer"
         @click="onHandleChangeVillage(village_number)"
       /> -->
-      <div v-for="(ballotByVillage, key) in ballotByVillages" :key="key" class="flex">
+      <div
+        v-for="(ballotByVillage, key) in ballotByVillages?.filter(
+          (v) => v.village_number === villageNumber
+        )"
+        :key="key"
+        class="flex"
+      >
         <div v-for="(_, index) in 3" :key="index" class="flex-1 flex flex-col">
           <h2 class="text-xl font-semibold pl-6">
             {{ index === 0 ? "บัตรดี" : index === 1 ? "บัตรเสีย" : "งดออกเสียง" }}
@@ -126,10 +144,13 @@
       </div>
     </div>
   </div>
+
+  <BackgroudSound />
 </template>
 <script setup lang="ts">
 import { ref } from "vue"
 import CandidateComponent from "~/components/Candidate.vue"
+import BackgroudSound from "~/components/BackgroudSound.vue"
 import type {
   Candidate,
   CandidateVoteSummary,
@@ -187,7 +208,6 @@ const { data: voteSummary, refresh: refreshVoteSummary } = await useAsyncData<
   const { data } = await client
     .from("council_results")
     .select("*")
-    .eq("village_number", villageNumber.value)
     .order("number", { ascending: true })
   const response = (data as CandidateVoteSummary[] | null) ?? []
   return response.map((item) => ({
@@ -202,21 +222,19 @@ const { data: ballotByVillages, refresh: refreshBallotByVillages } = await useAs
   const { data } = await client
     .from("ballot_by_village")
     .select("*")
-    .eq("village_number", villageNumber.value)
+    // .eq("village_number", villageNumber.value)
     .eq("candidate_type_code", "council")
   return data as BallotByVillage[] | []
 })
 
-const { data: countingProgressByVillage, refresh: refreshCountingProgressByVillage } =
-  await useAsyncData<CountingProgressByVillage | null>(
+const { data: countingProgressByVillages, refresh: refreshCountingProgressByVillage } =
+  await useAsyncData<CountingProgressByVillage[] | []>(
     "CountingProgressByVillage",
-    async (): Promise<CountingProgressByVillage | null> => {
-      const { data } = await client
-        .from("counting_progress_by_villages")
-        .select("*")
-        .eq("village_number", villageNumber.value)
-        .single()
-      return data as CountingProgressByVillage | null
+    async (): Promise<CountingProgressByVillage[] | []> => {
+      const { data } = await client.from("counting_progress_by_villages").select("*")
+      // .eq("village_number", villageNumber.value)
+      // .single()
+      return data as CountingProgressByVillage[] | []
     }
   )
 
@@ -244,9 +262,9 @@ const onHandleChangeVillage = (village_number: number) => {
   setTimeout(() => {
     villageNumber.value = village_number
     refreshCandidateVoteByStations()
-    refreshVoteSummary()
-    refreshBallotByVillages()
-    refreshCountingProgressByVillage()
+    // refreshVoteSummary()
+    // refreshBallotByVillages()
+    // refreshCountingProgressByVillage()
   }, 1000)
 }
 

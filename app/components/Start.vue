@@ -39,7 +39,7 @@
 
     <footer class="h-[32vh] absolute bottom-0 left-0 right-0">
       <div
-        class="flex justify-center left-0 right-0 items-center gap-4 z-10 absolute bottom-[200px] 2xl:bottom-[300px] animate-fade-in-down"
+        class="flex justify-center left-0 right-0 items-center gap-4 z-10 absolute bottom-[200px] 2xl:bottom-[250px] animate-fade-in-down"
         style="animation-delay: 1s"
       >
         <h2 class="text-white font-bold text-shadow-lg text-shadow-gray-500/50 text-4xl">
@@ -57,7 +57,7 @@
         </div> -->
       </div>
       <div
-        class="absolute bottom-[80px] 2xl:bottom-[150px] left-0 right-0 flex flex-col items-center justify-center"
+        class="absolute bottom-[80px] 2xl:bottom-[100px] left-0 right-0 flex flex-col items-center justify-center"
       >
         <h2
           class="text-white text-center font-bold text-5xl 2xl:text-7xl text-shadow-lg text-shadow-gray-500/50 heading-text relative"
