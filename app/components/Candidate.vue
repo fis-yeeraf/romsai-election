@@ -42,10 +42,10 @@
               :key="index"
               class="flex flex-col items-center justify-center"
             >
-              <div class="text-xs font-bold skew-x-30 origin-center">
+              <div class="text-md font-bold skew-x-30 origin-center">
                 {{ station.station_name }}
               </div>
-              <div class="text-md font-bold skew-x-30 origin-center font-mono leading-0 pl-3">
+              <div class="text-2xl font-bold skew-x-30 origin-center font-mono leading-0 pl-3">
                 <NumberFlow :value="station.total_votes || 0" />
               </div>
             </div>

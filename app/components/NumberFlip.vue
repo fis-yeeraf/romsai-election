@@ -1,18 +1,18 @@
 <template>
   <div class="flex flex-col items-center gap-3">
     <div class="flex gap-2">
-      <div class="relative h-[90px] w-[130px] overflow-hidden rounded-md text-gray-600 text-8xl">
+      <div class="relative h-[90px] w-[130px] overflow-hidden rounded-md text-gray-500 text-8xl">
         <div
           class="number-top absolute w-full h-full bg-white text-center shadow-sm shadow-gray-500"
         >
-          <h3 class="relative -left-[5px] font-bold font-mono -tracking-[10px]">
+          <h3 class="font-bold font-mono">
             {{ number.toString().padStart(2, "0") }}
           </h3>
         </div>
         <div
           class="number-bottom absolute w-full h-full bg-white text-center shadow-sm shadow-gray-500"
         >
-          <h3 class="relative -left-[5px] font-bold font-mono -tracking-[10px]">
+          <h3 class="font-bold font-mono">
             {{ number.toString().padStart(2, "0") }}
           </h3>
         </div>

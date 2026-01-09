@@ -120,7 +120,7 @@
             {{ index === 0 ? "บัตรดี" : index === 1 ? "บัตรเสีย" : "งดออกเสียง" }}
           </h2>
           <div
-            class="py-2 text-lg font-bold text-center -skew-x-30 origin-center"
+            class="py-2 text-4xl font-bold text-center -skew-x-30 origin-center"
             :class="`bg-${
               index === 0
                 ? 'primary text-white'
