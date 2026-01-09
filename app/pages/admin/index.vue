@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto">
-    <UCard class="pb-5">
+    <UCard class="pb-20">
       <h1 class="text-2xl font-bold-3">ลงคะแนนเลือกตั้ง</h1>
       <hr class="my-4 border-gray-200" />
       <Station
@@ -28,7 +28,10 @@
                   vote.candidate_number === candidate.number && vote.station_id === selectedStation
               )?.total_votes
             "
-            @vote="onRecordVote"
+            :disablePlus="votes.length === 2"
+            :resetScore="resetScore"
+            @vote="onRecordVotes"
+            @votes="onVotes"
           />
         </li>
         <li v-for="(_, index) in 2" :key="index">
@@ -39,7 +42,7 @@
             :voteCount="
               index + 1 === 1 ? ballotByStation?.invalid_votes ?? 0 : ballotByStation?.no_votes ?? 0
             "
-            @vote="onRecordVote"
+            @vote="onRecordVotes"
           />
         </li>
       </ul>
@@ -69,10 +72,43 @@
       <!-- </template> -->
     </UCard>
   </div>
+  <div
+    v-if="villageNumber === 2"
+    class="fixed flex justify-center gap-3 bottom-0 right-0 left-0 py-5 px-2 bg-gray-900 border-t border-gray-200 shadow-lg"
+  >
+    <UButton
+      icon="i-lucide-minus"
+      size="xl"
+      color="error"
+      variant="solid"
+      @click="onUpdateVoters(-1)"
+    />
+    <UButton
+      :disabled="votes.length === 0"
+      icon="i-lucide-check"
+      size="xl"
+      color="info"
+      class="flex-1 flex justify-center items-center"
+      @click="onHandleConfirm"
+      >ยืนยันคะแนน ({{ summaryVoteByStation[0]?.total_voters || 0 }})</UButton
+    >
+    <UButton
+      icon="i-lucide-plus"
+      size="xl"
+      color="primary"
+      variant="solid"
+      @click="onUpdateVoters(1)"
+    />
+  </div>
 </template>
 <script setup lang="ts">
 import type { RealtimeChannel } from "@supabase/supabase-js"
-import type { BallotByStation, CountingProgressByStation, RecordVote } from "~~/shared/types"
+import type {
+  BallotByStation,
+  CountingProgressByStation,
+  RecordVote,
+  RecordVotes,
+} from "~~/shared/types"
 
 const toast = useToast()
 const openModalPercent = ref(false)
@@ -84,6 +120,8 @@ const selectedStation = ref<string | null>(null)
 const summaryVoteByStation = ref<CandidateVoteSummaryByStation[]>([])
 const ballotByStation = ref<BallotByStation | null>(null)
 const countingProgressByStation = ref<CountingProgressByStation | null>(null)
+const votes = ref<number[]>([])
+const resetScore = ref<Date | null>(new Date())
 
 const client = useSupabaseClient()
 
@@ -158,6 +196,7 @@ watch(selectedStation, (value) => {
     onLoadSummaryVoteByStation()
     onLoadBallotByStation()
     onLoadCountingProgressByStation()
+    votes.value = []
   }
 })
 
@@ -182,7 +221,7 @@ const onUpdateEligibleVoters = async (voters: number) => {
         color: "success",
       })
     }
-  } catch (error) {
+  } catch {
     toast.add({
       title: "เกิดข้อผิดพลาด",
       description: "เกิดข้อผิดพลาดในการอัพเดตผู้มาใช้สิทธิ์",
@@ -297,6 +336,101 @@ const onRecordVote = async ({
     toast.add({
       title: "สำเร็จ",
       description: "อัพเดตคะแนนเรียบร้อย",
+      color: "success",
+      duration: 1000,
+    })
+  }
+}
+
+const onVotes = async (candidateNumber: number, type: "plus" | "minus") => {
+  if (type === "plus") {
+    if (!votes.value.includes(candidateNumber)) {
+      votes.value.push(candidateNumber)
+    }
+  } else if (votes.value.includes(candidateNumber)) {
+    votes.value = votes.value.filter((item) => item !== candidateNumber)
+  }
+}
+
+const onHandleConfirm = () => {
+  if (votes.value.length) {
+    onRecordVotes({
+      stationName:
+        stations.value?.find((station) => station.id === selectedStation.value)?.name || "",
+      villageNumber: villageNumber.value,
+      candidate1Number: votes.value[0] || null,
+      candidate2Number: votes.value[1] || null,
+      candidateType: "council",
+      ballotType: "valid",
+      score: 1,
+    } as RecordVotes)
+  }
+}
+
+const onRecordVotes = async ({
+  stationName,
+  villageNumber,
+  candidate1Number,
+  candidate2Number,
+  candidateType,
+  ballotType,
+  score,
+}: RecordVotes) => {
+  const { error } = await client.rpc("record_vote_new", {
+    station: stationName,
+    p_village_number: villageNumber,
+    candidate_1_number: candidate1Number,
+    candidate_2_number: candidate2Number,
+    candidate_type: candidateType,
+    ballot_type: ballotType,
+    p_change_amount: score,
+  } as never)
+  if (error) {
+    console.error("Error updating vote:", error)
+    toast.add({
+      title: "เกิดข้อผิดพลาด",
+      description: "เกิดข้อผิดพลาดในการอัพเดตคะแนน",
+      color: "error",
+      duration: 1000,
+    })
+  } else {
+    toast.add({
+      title: "สำเร็จ",
+      description: "อัพเดตคะแนนเรียบร้อย",
+      color: "success",
+      duration: 1000,
+    })
+  }
+  votes.value = []
+  resetScore.value = new Date()
+}
+
+const onUpdateVoters = async (value: number) => {
+  const { data }: { data: { voter_count: number }[] | null } = await client
+    .from("votes")
+    .select("voter_count")
+    .eq("polling_station_id", selectedStation.value!)
+
+  const currentVoters = data?.[0]?.voter_count || 0
+  if (currentVoters + value < 0) return
+
+  const { error } = await client
+    .from("votes")
+    .update({ voter_count: currentVoters + value } as never)
+    .eq("polling_station_id", selectedStation.value!)
+
+  if (error) {
+    console.error("Error updating voters:", error)
+    toast.add({
+      title: "เกิดข้อผิดพลาด",
+      description: "เกิดข้อผิดพลาดในการอัพเดตจำนวนบัตร",
+      color: "error",
+      duration: 1000,
+    })
+  } else {
+    toast.add({
+      title: "สำเร็จ",
+      description: "อัพเดตจำนวนบัตรเรียบร้อย",
       color: "success",
       duration: 1000,
     })

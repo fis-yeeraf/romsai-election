@@ -57,7 +57,7 @@
     <div
       v-else
       class="w-full flex items-center gap-3 px-5 py-3"
-      :class="{ 'bg-error/20': ballotType === 'invalid', 'bg-gray-200': ballotType === 'no_vote' }"
+      :class="{ 'bg-error/10': ballotType === 'invalid', 'bg-gray-200': ballotType === 'no_vote' }"
     >
       <div class="flex-1 flex flex-col justify-between">
         <h2 class="text-2xl font-bold">
@@ -74,33 +74,24 @@
         color="error"
         class="flex-1 flex justify-center items-center py-3 cursor-pointer rounded-none text-lg"
         icon="i-lucide-minus"
-        @click="
-          onChangeScore({
-            stationName: props.stationName!,
-            villageNumber: props.villageNumber!,
-            candidateNumber: candidate?.number || null,
-            candidateType,
-            ballotType: ballotType,
-            score: -1,
-          })
-        "
+        :disabled="voteCount === 0 && ballotType !== 'valid'"
+        @click="onHandleClick('minus')"
       >
         ลบคะแนน
       </UButton>
+      <input
+        v-if="villageNumber === 2 && ballotType === 'valid'"
+        name="score"
+        v-model="score"
+        readonly
+        class="w-[40px] text-center text-gray-900 font-bold text-2xl outline-none"
+      />
       <UButton
         color="primary"
         class="flex-1 flex justify-center items-center py-3 cursor-pointer rounded-none text-lg"
         icon="i-lucide-plus"
-        @click="
-          onChangeScore({
-            stationName: props.stationName!,
-            villageNumber: props.villageNumber!,
-            candidateNumber: candidate?.number || null,
-            candidateType,
-            ballotType,
-            score: 1,
-          })
-        "
+        :disabled="(villageNumber === 2 && score > 0 && ballotType === 'valid') || disablePlus"
+        @click="onHandleClick('plus')"
       >
         เพิ่มคะแนน
       </UButton>
@@ -108,12 +99,13 @@
   </div>
 </template>
 <script setup lang="ts">
-import type { RecordVote } from "~/shared/types"
-
+import type { RecordVotes } from "~~/shared/types"
 const {
   ballotType = "valid",
   candidateType = "council",
   candidate = null,
+  disablePlus = false,
+  disableMinus = false,
   ...props
 } = defineProps<{
   candidateType?: "mayor" | "council"
@@ -122,21 +114,68 @@ const {
   voteCount: number | null | undefined
   stationName: string | undefined
   villageNumber: number | undefined
+  resetScore?: Date | null
+  disablePlus?: boolean
+  disableMinus?: boolean
 }>()
 const openModal = ref(false)
 const error = ref<string | null>(null)
+const score = ref<number>(0)
 
-const emit = defineEmits(["vote"])
+const emit = defineEmits(["vote", "votes"])
 
-const onChangeScore = (vote: RecordVote) => {
-  // if (score.value === null) {
-  //   error.value = "กรุณากรอกคะแนน"
-  //   return
-  // }
-  // if (!/^\d+$/.test(score.value?.toString() || "")) {
-  //   error.value = "กรุณากรอกตัวเลขเท่านั้น"
-  //   return
-  // }
-  emit("vote", vote)
+watch(
+  () => props.resetScore,
+  () => {
+    score.value = 0
+  }
+)
+
+const onHandleClick = (type: "plus" | "minus") => {
+  if (type === "plus") {
+    if (props.villageNumber === 2 && ballotType === "valid") {
+      score.value++
+      emit("votes", candidate?.number, type)
+    } else {
+      // emit("vote", {
+      //   stationName: props.stationName!,
+      //   villageNumber: props.villageNumber!,
+      //   candidateNumber: candidate?.number || null,
+      //   candidateType,
+      //   ballotType,
+      //   score: 1,
+      // })
+      emit("vote", {
+        stationName: props.stationName!,
+        villageNumber: props.villageNumber!,
+        candidate1Number: candidate?.number || null,
+        candidate2Number: null,
+        candidateType,
+        ballotType,
+        score: 1,
+      } as RecordVotes)
+    }
+  } else if (props.villageNumber === 2 && ballotType === "valid" && score.value > 0) {
+    score.value--
+    emit("votes", candidate?.number, type)
+  } else {
+    // emit("vote", {
+    //   stationName: props.stationName!,
+    //   villageNumber: props.villageNumber!,
+    //   candidateNumber: candidate?.number || null,
+    //   candidateType,
+    //   ballotType,
+    //   score: -1,
+    // })
+    emit("vote", {
+      stationName: props.stationName!,
+      villageNumber: props.villageNumber!,
+      candidate1Number: candidate?.number || null,
+      candidate2Number: null,
+      candidateType,
+      ballotType,
+      score: -1,
+    } as RecordVotes)
+  }
 }
 </script>

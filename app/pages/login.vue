@@ -1,7 +1,7 @@
 <template>
   <div class="flex justify-center align-center h-screen bg-gray-900">
     <div class="content-center">
-      <UCard class="flex justify-center align-center bg-gray-800 px-3">
+      <UCard class="flex justify-center align-center bg-gray-800 mx-5">
         <form @submit.prevent="handleLogin({ email, password })">
           <div class="text-center mb-5">
             <span

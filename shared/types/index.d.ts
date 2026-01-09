@@ -56,6 +56,7 @@ export interface CandidateVoteSummaryByStation {
   first_name: string
   last_name: string
   total_votes: number
+  total_voters: number
   last_updated: Date
 }
 
@@ -84,6 +85,16 @@ export interface RecordVote {
   stationName: string
   villageNumber: number
   candidateNumber: number | null | string
+  candidateType: "mayor" | "council"
+  ballotType: "valid" | "invalid" | "no_vote"
+  score: number
+}
+
+export interface RecordVotes {
+  stationName: string
+  villageNumber: number
+  candidate1Number: number | null | string
+  candidate2Number: number | null | string
   candidateType: "mayor" | "council"
   ballotType: "valid" | "invalid" | "no_vote"
   score: number
