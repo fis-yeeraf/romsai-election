@@ -27,7 +27,7 @@
           </div> -->
           </div>
           <div class="bg-gray-300 -skew-x-30 origin-center flex gap-3 items-center justify-center">
-            <div class="text-6xl font-bold skew-x-30 origin-center font-mono">
+            <div class="text-7xl font-bold skew-x-30 origin-center font-mono">
               <NumberFlow :value="totalVotes || 0" />
               <!-- {{ totalVotes.toLocaleString() || "0" }} -->
             </div>
@@ -45,7 +45,7 @@
               <div class="text-md font-bold skew-x-30 origin-center">
                 {{ station.station_name }}
               </div>
-              <div class="text-4xl font-bold skew-x-30 origin-center font-mono leading-0 pl-3">
+              <div class="text-5xl font-bold skew-x-30 origin-center font-mono leading-0 pl-3">
                 <NumberFlow :value="station.total_votes || 0" />
               </div>
             </div>
