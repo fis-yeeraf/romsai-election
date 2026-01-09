@@ -162,7 +162,7 @@ import { formatThaiDate } from "~~/shared/utils"
 import type { RealtimeChannel } from "@supabase/supabase-js"
 
 const client = useSupabaseClient()
-const villageNumber = ref(2)
+const villageNumber = ref(1)
 let changeVillageInterval: ReturnType<typeof setInterval> | null = null
 const bgColors = ["primary", "warning", "[#464644]", "error", "info"]
 const currentDateTime = ref<string | null>(null)
@@ -271,13 +271,13 @@ const onHandleChangeVillage = (village_number: number) => {
 const shuffledColors = new Array(5).fill(null).map(() => getShuffledColors())
 
 onMounted(() => {
-  // changeVillageInterval = setInterval(() => {
-  //   if (villageNumber.value >= 5) {
-  //     onHandleChangeVillage(1)
-  //   } else {
-  //     onHandleChangeVillage(villageNumber.value + 1)
-  //   }
-  // }, 10000) // Change every 10 seconds
+  changeVillageInterval = setInterval(() => {
+    if (villageNumber.value >= 5) {
+      onHandleChangeVillage(1)
+    } else {
+      onHandleChangeVillage(villageNumber.value + 1)
+    }
+  }, 10000) // Change every 10 seconds
 
   changeCurrentDateTimeInterval = setInterval(() => {
     currentDateTime.value = formatThaiDate(new Date())
