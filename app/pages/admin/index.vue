@@ -204,7 +204,7 @@ const onUpdateEligibleVoters = async (voters: number) => {
   try {
     const { error } = await client
       .from("polling_stations")
-      .update({ total_eligible_voters: voters } as never)
+      .update({ total_eligible_voters: Math.max(voters, 0) } as never)
       .eq("id", selectedStation.value!)
 
     if (error) {

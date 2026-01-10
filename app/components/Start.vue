@@ -97,7 +97,7 @@ const calculateDaysLeft = () => {
   const today = new Date()
 
   const timeDiff = targetDate.getTime() - today.getTime()
-  const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24))
+  const daysLeft = Math.floor(Math.abs(timeDiff / (1000 * 60 * 60 * 24)))
   countdownDays.value = Math.max(0, daysLeft)
 
   const hoursLeft = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
@@ -111,7 +111,7 @@ let countdownInterval: ReturnType<typeof setInterval> | null = null
 
 onMounted(() => {
   calculateDaysLeft()
-  countdownInterval = setInterval(calculateDaysLeft, 1000 * 60) // Update every minute
+  countdownInterval = setInterval(calculateDaysLeft, 1000) // Update every minute
 })
 
 onUnmounted(() => {

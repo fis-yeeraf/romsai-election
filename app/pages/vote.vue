@@ -5,9 +5,7 @@
       background: 'url(/images/bg.png) center center/cover no-repeat',
     }"
   ></div>
-  <div
-    class="relative min-h-screen flex flex-col justify-between 2xl:justify-around items-center py-5"
-  >
+  <div class="relative min-h-screen flex flex-col justify-between 2xl:justify-around items-center">
     <div class="w-full max-w-7xl mx-auto py-5">
       <section class="mx-5 flex justify-between items-center gap-5">
         <div class="flex flex-col justify-between items-center gap-2">
@@ -132,10 +130,10 @@
             <h2 class="skew-x-30 origin-center">
               {{
                 index === 0
-                  ? ballotByVillage?.valid_votes ?? 0
+                  ? Math.max(ballotByVillage?.valid_votes ?? 0, 0)
                   : index === 1
-                  ? ballotByVillage?.invalid_votes ?? 0
-                  : ballotByVillage?.no_votes ?? 0
+                  ? Math.max(ballotByVillage?.invalid_votes ?? 0, 0)
+                  : Math.max(ballotByVillage?.no_votes ?? 0, 0)
               }}
               ใบ
             </h2>
@@ -359,5 +357,11 @@ onUnmounted(() => {
 }
 .bg-yellow {
   background: #e65c00;
+}
+</style>
+<style>
+.digit__num,
+.number .section::after {
+  padding: 0 !important;
 }
 </style>

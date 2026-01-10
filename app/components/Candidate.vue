@@ -31,7 +31,7 @@
               <NumberFlow :value="totalVotes || 0" />
               <!-- {{ totalVotes.toLocaleString() || "0" }} -->
             </div>
-            <div class="text-xl font-bold skew-x-30 origin-center pt-5">(คะแนน)</div>
+            <div class="text-xl font-bold skew-x-30 origin-center pt-9">(คะแนน)</div>
           </div>
           <div
             class="text-white -skew-x-30 origin-center pt-2 flex gap-10 items-end justify-center"
