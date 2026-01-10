@@ -4,6 +4,7 @@ export interface Candidate {
   last_name: string
   number: number
   avatar?: string
+  avater_position?: { x: number; y: number }
   village_number: number
 }
 
@@ -44,6 +45,7 @@ export interface CandidateVoteSummary {
   first_name: string
   last_name: string
   avatar?: string
+  avater_position?: { x: number; y: number }
   total_votes: number
   last_updated: Date
 }

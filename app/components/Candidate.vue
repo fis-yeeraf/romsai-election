@@ -1,10 +1,11 @@
 <template>
   <div class="relative flex flex-col items-center h-[50vh] max-h-[385px]">
-    <div
-      class="h-full w-4/5"
-      style="background-size: cover; background-position: center 15px; background-repeat: no-repeat"
-      :style="{ backgroundImage: `url(${candidate.avatar})` }"
-    ></div>
+    <div class="h-full w-4/5 overflow-hidden">
+      <div
+        class="w-full h-full no-repeat"
+        :style="`background-image: url(/images/all.png); background-size: calc(392px * 10); background-position: ${candidate.avater_position?.x}px ${candidate.avater_position?.y}px`"
+      ></div>
+    </div>
     <div class="absolute left-2 right-2 bottom-0">
       <div class="relative">
         <div

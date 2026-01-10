@@ -165,6 +165,14 @@ let changeVillageInterval: ReturnType<typeof setInterval> | null = null
 const bgColors = ["primary", "warning", "[#464644]", "error", "info"]
 const currentDateTime = ref<string | null>(null)
 let changeCurrentDateTimeInterval: ReturnType<typeof setInterval> | null = null
+const avaterPosition = [
+  [0, -399],
+  [-798, -1197, -1596],
+  [-1990, -2387],
+  [-2793],
+  [-3192, -3591],
+  [-3591, -3990],
+]
 
 let realtimeVoteResultChannel: RealtimeChannel
 
@@ -192,11 +200,17 @@ const { data: candidates } = await useAsyncData<Candidate[] | null>(
       .select("*, villages(village_number)")
       .not("village_id", "is", null)
       .order("number", { ascending: true })
-    return (data as any[])?.map((item: any) => ({
-      ...item,
-      village_number: item.villages?.village_number ?? villageNumber.value,
-      avatar: `/images/${item.villages?.village_number}-${item.number}.png`,
-    })) as Candidate[]
+    return (data as any[])?.map((item: any) => {
+      return {
+        ...item,
+        village_number: item.villages?.village_number ?? villageNumber.value,
+        avatar: `/images/${item.villages?.village_number}-${item.number}.png`,
+        avater_position: {
+          x: avaterPosition[item.villages?.village_number - 1]?.[item.number - 1] ?? 0,
+          y: 0,
+        },
+      }
+    }) as Candidate[]
   }
 )
 
